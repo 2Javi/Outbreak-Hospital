@@ -34,17 +34,17 @@ public class ZombieAI : MonoBehaviour
         if (Distance <= detectionRange)
         {
             Agent.SetDestination(Player.position);
-            // anim.SetBool("isWalking", true);
+            anim.SetBool("isWalking", true);
 
             if (Distance <= attackDistance && isAttacking)
             {
-                // StartCoroutine(PlayAttackAnimation());
+                StartCoroutine(PlayAttackAnimation());
             }
         }
         else
         {
             Agent.ResetPath();
-            // anim.SetBool("isWalking", false);
+            anim.SetBool("isWalking", false);
         }
 
         IEnumerator PlayAttackAnimation()
