@@ -56,4 +56,8 @@ public class MovementStateManager : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(spherePoss, controller.radius - 0.05f);
     }
+
+
+
+
 }

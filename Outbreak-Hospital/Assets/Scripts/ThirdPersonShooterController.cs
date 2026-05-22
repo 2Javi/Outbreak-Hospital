@@ -7,7 +7,7 @@ public class ThirdPersonShooterController : MonoBehaviour
     [SerializeField] private CinemachineCamera aimVirtualCamera;
     public bool aim;
 
-    private void Update()
+    private void LateUpdate()
     {
         if (aim)
         {
