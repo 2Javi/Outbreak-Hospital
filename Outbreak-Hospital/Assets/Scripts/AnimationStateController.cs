@@ -10,6 +10,7 @@ public class AnimationStateController : MonoBehaviour
     int isStrafingLeftHash;
     int isStrafingRightHash;
     int isWalkingBackHash;
+    int isAimingHash;
 
     void Start()
     {
@@ -20,6 +21,7 @@ public class AnimationStateController : MonoBehaviour
         isStrafingLeftHash = Animator.StringToHash("isStrafingLeft");
         isStrafingRightHash = Animator.StringToHash("isStrafingRight");
         isWalkingBackHash = Animator.StringToHash("isWalkingBack");
+        isAimingHash = Animator.StringToHash("isAiming");
     }
 
     void Update()
@@ -29,12 +31,16 @@ public class AnimationStateController : MonoBehaviour
         bool isWalkingBack = animator.GetBool(isWalkingBackHash);
         bool isStrafingLeft = animator.GetBool(isStrafingLeftHash);
         bool isStrafingRight = animator.GetBool(isStrafingRightHash);
+        bool isAiming = animator.GetBool(isAimingHash);
 
         bool forwardPressed = Input.GetKey("w");
         bool backPress = Input.GetKey("s");
         bool leftPressed = Input.GetKey("a");
         bool rightPressed = Input.GetKey("d");
         bool runPressed = Input.GetKey("left shift");
+        bool aimPressed = Input.GetMouseButton(1);
+
+
 
         if (!isWalking && forwardPressed)
             animator.SetBool(isWalkingHash, true);
@@ -64,5 +70,12 @@ public class AnimationStateController : MonoBehaviour
 
         if (isStrafingRight && !rightPressed)
             animator.SetBool(isStrafingRightHash, false);
+
+        if (!isAiming && aimPressed)
+            animator.SetBool(isAimingHash, true);
+
+        if (isAiming && !aimPressed)
+            animator.SetBool(isAimingHash, false);
+
     }
 }

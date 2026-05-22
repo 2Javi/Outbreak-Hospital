@@ -26,6 +26,9 @@ public class CameraRotation : MonoBehaviour
         _pitch -= mouseY;
         _pitch = Mathf.Clamp(_pitch, bottomClamp, topClamp);
 
+        Debug.Log($"mouseY: {mouseY:F3} | _pitch: {_pitch:F2} | cameraTarget world rot: {cameraTarget.rotation.eulerAngles}");
+
+
         cameraTarget.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
 
         PlayerRotation();
