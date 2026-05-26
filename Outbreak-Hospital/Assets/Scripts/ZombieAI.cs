@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
+using NUnit.Framework;
 
 public class ZombieAI : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class ZombieAI : MonoBehaviour
     public float detectionRange = 10f;
     public float attackDistance = 3f;
     public float attackInterval = 2f;
+    public float speed = 2f;
 
     NavMeshAgent Agent;
     Animator anim;
@@ -19,6 +21,7 @@ public class ZombieAI : MonoBehaviour
     {
         Agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
+        Agent.speed = speed;
         if (Player == null)
         {
             Player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -34,7 +37,7 @@ public class ZombieAI : MonoBehaviour
         if (Distance <= detectionRange)
         {
             Agent.SetDestination(Player.position);
-            anim.SetBool("isWalking", true);
+            // anim.SetBool("isWalking", true);
 
             if (Distance <= attackDistance && isAttacking)
             {
@@ -58,6 +61,26 @@ public class ZombieAI : MonoBehaviour
             Agent.isStopped = false;
             isAttacking = false;
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        Debug.Log(gameObject.name + " took damage. Health: " + health);
+
+        if (health <= 0)
+        {
+            Die();
+        }
+
+    }
+
+    private void Die()
+    {
+        isDead = true;
+        Debug.Log(gameObject.name + " died");
+
+        Agent.isStopped = true;
     }
 
 }

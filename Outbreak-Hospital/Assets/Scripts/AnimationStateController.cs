@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class AnimationStateController : MonoBehaviour
 {
@@ -11,10 +12,14 @@ public class AnimationStateController : MonoBehaviour
     int isStrafingRightHash;
     int isWalkingBackHash;
     int isAimingHash;
+    int aimingLayerIndex;
+    public Rig playerRig;
 
     void Start()
     {
+
         animator = GetComponent<Animator>();
+        aimingLayerIndex = animator.GetLayerIndex("Aiming");
 
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
@@ -72,10 +77,20 @@ public class AnimationStateController : MonoBehaviour
             animator.SetBool(isStrafingRightHash, false);
 
         if (!isAiming && aimPressed)
+        {
+            animator.SetLayerWeight(aimingLayerIndex, 1);
+            playerRig.weight = 1f;
             animator.SetBool(isAimingHash, true);
+        }
+
 
         if (isAiming && !aimPressed)
+        {
+            animator.SetLayerWeight(aimingLayerIndex, 0);
+            playerRig.weight = 0f;
             animator.SetBool(isAimingHash, false);
+        }
+
 
     }
 }
