@@ -55,7 +55,7 @@ public class AnimationStateController : MonoBehaviour
         if (!isWalking && forwardPressed)
         {
             animator.SetBool(isWalkingHash, true);
-            Debug.Log("isCrouch: " + animator.GetBool(isCruchHash) + " isWalking: " + animator.GetBool(isWalkingHash));
+
         }
 
 
@@ -105,8 +105,8 @@ public class AnimationStateController : MonoBehaviour
             isCrouch = !isCrouch;
             // Debug.Log("after: " + isCrouch);
             animator.SetBool(isCruchHash, isCrouch);
-            Debug.Log("animator says: " + animator.GetBool(isCruchHash));
-            Debug.Log("isCrouch: " + animator.GetBool(isCruchHash) + " isWalking: " + animator.GetBool(isWalkingHash));
+
+
         }
 
 

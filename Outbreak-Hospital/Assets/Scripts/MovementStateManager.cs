@@ -4,7 +4,7 @@ using UnityEngine;
 public class MovementStateManager : MonoBehaviour
 
 {
-    public float moveSpeed = 3;
+    public float moveSpeed = 3f;
     [HideInInspector] public Vector3 dir;
     float horizontal_input, vertical_input;
     CharacterController controller;
