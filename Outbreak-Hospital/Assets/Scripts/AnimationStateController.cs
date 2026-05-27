@@ -14,6 +14,7 @@ public class AnimationStateController : MonoBehaviour
     int isAimingHash;
     int aimingLayerIndex;
     public Rig playerRig;
+    int isCruchHash;
 
     void Start()
     {
@@ -27,6 +28,7 @@ public class AnimationStateController : MonoBehaviour
         isStrafingRightHash = Animator.StringToHash("isStrafingRight");
         isWalkingBackHash = Animator.StringToHash("isWalkingBack");
         isAimingHash = Animator.StringToHash("isAiming");
+        isCruchHash = Animator.StringToHash("isCrouch");
     }
 
     void Update()
@@ -37,6 +39,7 @@ public class AnimationStateController : MonoBehaviour
         bool isStrafingLeft = animator.GetBool(isStrafingLeftHash);
         bool isStrafingRight = animator.GetBool(isStrafingRightHash);
         bool isAiming = animator.GetBool(isAimingHash);
+        bool isCrouch = animator.GetBool(isCruchHash);
 
         bool forwardPressed = Input.GetKey("w");
         bool backPress = Input.GetKey("s");
@@ -44,11 +47,17 @@ public class AnimationStateController : MonoBehaviour
         bool rightPressed = Input.GetKey("d");
         bool runPressed = Input.GetKey("left shift");
         bool aimPressed = Input.GetMouseButton(1);
+        bool crouchPressed = Input.GetKeyDown("c");
+
 
 
 
         if (!isWalking && forwardPressed)
+        {
             animator.SetBool(isWalkingHash, true);
+            Debug.Log("isCrouch: " + animator.GetBool(isCruchHash) + " isWalking: " + animator.GetBool(isWalkingHash));
+        }
+
 
         if (isWalking && !forwardPressed)
             animator.SetBool(isWalkingHash, false);
@@ -83,13 +92,24 @@ public class AnimationStateController : MonoBehaviour
             animator.SetBool(isAimingHash, true);
         }
 
-
         if (isAiming && !aimPressed)
         {
             animator.SetLayerWeight(aimingLayerIndex, 0);
             playerRig.weight = 0f;
             animator.SetBool(isAimingHash, false);
         }
+
+        if (Input.GetKeyDown("c"))
+        {
+            // Debug.Log("before: " + isCrouch);
+            isCrouch = !isCrouch;
+            // Debug.Log("after: " + isCrouch);
+            animator.SetBool(isCruchHash, isCrouch);
+            Debug.Log("animator says: " + animator.GetBool(isCruchHash));
+            Debug.Log("isCrouch: " + animator.GetBool(isCruchHash) + " isWalking: " + animator.GetBool(isWalkingHash));
+        }
+
+
 
 
     }
