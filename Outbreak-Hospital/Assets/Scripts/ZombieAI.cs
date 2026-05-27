@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-using NUnit.Framework;
+
 
 public class ZombieAI : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class ZombieAI : MonoBehaviour
     bool isAttacking;
 
     [SerializeField] private GameObject mist;
-
+    [SerializeField] private float sightThreshold = 0.5f;
     private void Start()
     {
         Agent = GetComponent<NavMeshAgent>();
@@ -32,11 +32,14 @@ public class ZombieAI : MonoBehaviour
 
     private void Update()
     {
+
+        Debug.DrawRay(transform.position, transform.forward * 5, Color.red);
+
         if (isDead) return;
 
         float Distance = Vector3.Distance(transform.position, Player.position);
 
-        if (Distance <= detectionRange)
+        if (CanSeePlayer())
         {
             Agent.SetDestination(Player.position);
 
@@ -87,4 +90,30 @@ public class ZombieAI : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private bool CanSeePlayer()
+    {
+        // 1. range check
+        float distance = Vector3.Distance(transform.position, Player.position);
+        if (distance > detectionRange) return false;
+
+        // 2. angle check
+        Vector3 forwards = transform.forward;
+        Vector3 playerDirection = (Player.position - transform.position).normalized;
+        float alignment = Vector3.Dot(forwards, playerDirection);
+        if (alignment < sightThreshold) return false;
+
+        // 3. line of sight
+        Vector3 eyePosition = transform.position + Vector3.up * 1.5f;
+        if (Physics.Raycast(eyePosition, playerDirection, out RaycastHit hit, detectionRange))
+        {
+            if (hit.collider.gameObject != Player.gameObject) return false;
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
 }
+
