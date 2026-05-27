@@ -5,11 +5,16 @@ public class MistLogic : MonoBehaviour
     private GameObject playerRef;
     PlayerStats referenceToPlayerStats;
     MovementStateManager referenceToMovemementStateManager;
+    void Update()
+    {
+
+    }
     void Start()
     {
         playerRef = GameObject.FindGameObjectWithTag("Player");
         referenceToPlayerStats = playerRef.GetComponent<PlayerStats>();
         referenceToMovemementStateManager = playerRef.GetComponent<MovementStateManager>();
+        Destroy(gameObject, 10);
     }
     void OnTriggerStay(Collider other)
     {

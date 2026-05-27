@@ -17,6 +17,8 @@ public class ZombieAI : MonoBehaviour
     bool isDead = false;
     bool isAttacking;
 
+    [SerializeField] private GameObject mist;
+
     private void Start()
     {
         Agent = GetComponent<NavMeshAgent>();
@@ -37,7 +39,6 @@ public class ZombieAI : MonoBehaviour
         if (Distance <= detectionRange)
         {
             Agent.SetDestination(Player.position);
-            // anim.SetBool("isWalking", true);
 
             if (Distance <= attackDistance && isAttacking)
             {
@@ -81,6 +82,9 @@ public class ZombieAI : MonoBehaviour
         Debug.Log(gameObject.name + " died");
 
         Agent.isStopped = true;
+
+        Instantiate(mist, gameObject.transform.position, mist.transform.rotation);
+        Destroy(gameObject);
     }
 
 }
