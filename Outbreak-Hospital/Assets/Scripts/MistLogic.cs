@@ -22,7 +22,7 @@ public class MistLogic : MonoBehaviour
         {
             Debug.Log("player in mist");
             referenceToPlayerStats.hallucination += 1 * Time.deltaTime;
-            referenceToMovemementStateManager.moveSpeed -= 0.1f * Time.deltaTime;
+            referenceToMovemementStateManager.currentSpeed -= 0.1f * Time.deltaTime;
             referenceToPlayerStats.health -= 10f * Time.deltaTime;
         }
 

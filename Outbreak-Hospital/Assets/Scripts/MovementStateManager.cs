@@ -1,10 +1,15 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class MovementStateManager : MonoBehaviour
 
 {
-    public float moveSpeed = 3f;
+    public float walkSpeed = 1.5f;
+    public float runSpeed = 2.5f;
+    public float crouchSpeed = 0.5f;
+    public float noiseLevel = 0f;
+    public float currentSpeed = 0f;
     [HideInInspector] public Vector3 dir;
     float horizontal_input, vertical_input;
     CharacterController controller;
@@ -14,9 +19,11 @@ public class MovementStateManager : MonoBehaviour
     [SerializeField] LayerMask groundMask;
     [SerializeField] float gravity = -9.81f;
     Vector3 velocity;
+    AnimationStateController animationStateControllerReference;
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        animationStateControllerReference = GetComponent<AnimationStateController>();
     }
 
     // Update is called once per frame
@@ -28,12 +35,33 @@ public class MovementStateManager : MonoBehaviour
 
     void getDirectionAndMove()
     {
+
+        if (animationStateControllerReference.isCrouch)
+        {
+            currentSpeed = crouchSpeed;
+            noiseLevel = 1f;
+        }
+        else if (animationStateControllerReference.isRunning)
+        {
+            currentSpeed = runSpeed;
+            noiseLevel = 3f;
+        }
+        else if (animationStateControllerReference.isWalking)
+        {
+            currentSpeed = walkSpeed;
+            noiseLevel = 2f;
+        }
+        else
+        {
+            noiseLevel = 0f;
+        }
+
         horizontal_input = Input.GetAxis("Horizontal");
         vertical_input = Input.GetAxis("Vertical");
 
         dir = transform.forward * vertical_input + transform.right * horizontal_input;
 
-        controller.Move(dir * moveSpeed * Time.deltaTime);
+        controller.Move(dir * currentSpeed * Time.deltaTime);
     }
 
     bool IsGrounded()

@@ -8,17 +8,22 @@ public class ZombieAI : MonoBehaviour
     public int health = 100;
     public Transform Player;
     public float detectionRange = 10f;
-    public float attackDistance = 3f;
-    public float attackInterval = 2f;
+    public float attackDistance = 0.5f;
+    public float attackInterval = 4f;
     public float speed = 2f;
 
     NavMeshAgent Agent;
     Animator anim;
     bool isDead = false;
-    bool isAttacking;
+    public bool isAttacking = true;
 
     [SerializeField] private GameObject mist;
     [SerializeField] private float sightThreshold = 0.5f;
+    MovementStateManager movementStateManagerReference;
+    PlayerStats playerStatsReference;
+    public float distance = 0f;
+    Vector3 playerDirection;
+    Vector3 eyePosition;
     private void Start()
     {
         Agent = GetComponent<NavMeshAgent>();
@@ -28,42 +33,54 @@ public class ZombieAI : MonoBehaviour
         {
             Player = GameObject.FindGameObjectWithTag("Player").transform;
         }
+        movementStateManagerReference = Player.gameObject.GetComponent<MovementStateManager>();
+        playerStatsReference = Player.gameObject.GetComponent<PlayerStats>();
+
     }
 
     private void Update()
     {
 
+        if (anim.runtimeAnimatorController != null)
+        {
+            anim.SetBool("isWalking", false);
+        }
+
         Debug.DrawRay(transform.position, transform.forward * 5, Color.red);
 
         if (isDead) return;
 
-        float Distance = Vector3.Distance(transform.position, Player.position);
+        distance = Vector3.Distance(transform.position, Player.position);
 
-        if (CanSeePlayer())
+        if (CanSeePlayer() || CanHearPlayer())
         {
             Agent.SetDestination(Player.position);
 
-            if (Distance <= attackDistance && isAttacking)
+            if (distance <= attackDistance && isAttacking)
             {
-                StartCoroutine(PlayAttackAnimation());
+                StartCoroutine(AttackPlayer());
             }
         }
         else
         {
+            if (anim.runtimeAnimatorController != null)
+            {
+                anim.SetBool("isWalking", false);
+            }
             Agent.ResetPath();
-            anim.SetBool("isWalking", false);
+
         }
 
-        IEnumerator PlayAttackAnimation()
+        IEnumerator AttackPlayer()
         {
             isAttacking = false;
             Agent.isStopped = true;
-            anim.SetTrigger("Attack");
-
+            // here goes attack animation
+            playerStatsReference.health -= 25f;
             yield return new WaitForSeconds(attackInterval);
-
             Agent.isStopped = false;
-            isAttacking = false;
+            isAttacking = true;
+
         }
     }
 
@@ -92,18 +109,18 @@ public class ZombieAI : MonoBehaviour
 
     private bool CanSeePlayer()
     {
-        // 1. range check
-        float distance = Vector3.Distance(transform.position, Player.position);
+
+        distance = Vector3.Distance(transform.position, Player.position);
         if (distance > detectionRange) return false;
 
         // 2. angle check
         Vector3 forwards = transform.forward;
-        Vector3 playerDirection = (Player.position - transform.position).normalized;
+        playerDirection = (Player.position - transform.position).normalized;
         float alignment = Vector3.Dot(forwards, playerDirection);
         if (alignment < sightThreshold) return false;
 
         // 3. line of sight
-        Vector3 eyePosition = transform.position + Vector3.up * 1.5f;
+        eyePosition = transform.position + Vector3.up * 1.5f;
         if (Physics.Raycast(eyePosition, playerDirection, out RaycastHit hit, detectionRange))
         {
             if (hit.collider.gameObject != Player.gameObject) return false;
@@ -115,5 +132,35 @@ public class ZombieAI : MonoBehaviour
 
         return true;
     }
+
+    private bool CanHearPlayer()
+    {
+
+        distance = Vector3.Distance(transform.position, Player.position);
+        playerDirection = (Player.position - transform.position).normalized;
+        eyePosition = transform.position + Vector3.up * 1.5f;
+
+        if (movementStateManagerReference.noiseLevel >= distance)
+        {
+            if (Physics.Raycast(eyePosition, playerDirection, out RaycastHit hit))
+            {
+                if (hit.collider.gameObject == Player.gameObject)
+                {
+                    Debug.Log("hit: " + hit.collider.gameObject.name);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+
 }
 

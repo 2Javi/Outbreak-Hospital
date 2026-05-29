@@ -16,6 +16,12 @@ public class AnimationStateController : MonoBehaviour
     public Rig playerRig;
     int isCruchHash;
 
+    public bool isCrouch;
+
+    public bool isRunning;
+
+    public bool isWalking;
+
     void Start()
     {
 
@@ -33,13 +39,13 @@ public class AnimationStateController : MonoBehaviour
 
     void Update()
     {
-        bool isRunning = animator.GetBool(isRunningHash);
-        bool isWalking = animator.GetBool(isWalkingHash);
+        isRunning = animator.GetBool(isRunningHash);
+        isWalking = animator.GetBool(isWalkingHash);
         bool isWalkingBack = animator.GetBool(isWalkingBackHash);
         bool isStrafingLeft = animator.GetBool(isStrafingLeftHash);
         bool isStrafingRight = animator.GetBool(isStrafingRightHash);
         bool isAiming = animator.GetBool(isAimingHash);
-        bool isCrouch = animator.GetBool(isCruchHash);
+        isCrouch = animator.GetBool(isCruchHash);
 
         bool forwardPressed = Input.GetKey("w");
         bool backPress = Input.GetKey("s");
