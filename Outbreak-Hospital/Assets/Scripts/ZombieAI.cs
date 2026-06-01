@@ -2,59 +2,103 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
+public enum EnemyState
+{
+    Idle,
+    Alert,
+    Attacking,
+    Dead,
+    Resurrected,
+    PermanentlyDead
+}
 
 public class ZombieAI : MonoBehaviour
 {
+    // ── Inspector / Tunable Settings ──────────────────────────────
+    [Header("Base Settings")]
+    public EnemyState currentState;
+    public float aggression = 1f;
     public int health = 100;
-    public Transform Player;
-    public float detectionRange = 10f;
-    public float attackDistance = 0.5f;
-    public float attackInterval = 4f;
     public float speed = 2f;
 
-    NavMeshAgent Agent;
-    Animator anim;
-    bool isDead = false;
-    public bool isAttacking = true;
-
-    [SerializeField] private GameObject mist;
+    [Header("Detection Settings")]
+    public float detectionRange = 10f;
     [SerializeField] private float sightThreshold = 0.5f;
-    MovementStateManager movementStateManagerReference;
-    PlayerStats playerStatsReference;
-    public float distance = 0f;
-    Vector3 playerDirection;
-    Vector3 eyePosition;
+
+    [Header("Attack Settings")]
+    public float attackDistance = 0.5f;
+    public float attackInterval = 4f;
+
+    [Header("Leap Settings")]
+    public float leapForce = 10f;
+    public float leapRange = 5f;
+    public float leapCooldown = 3f;
+    public float leapDamage = 20f;
+
+    [Header("References")]
+    public Transform Player;
+    [SerializeField] private GameObject mist;
+
+    // ── Cached Components ─────────────────────────────────────────
+    private Animator animator;
+    private Rigidbody rb;
+    private NavMeshAgent agent;
+    private MovementStateManager movementStateManager;
+    private PlayerStats playerStats;
+
+    // ── Animator Hashes ───────────────────────────────────────────
+    private int isDeadHash;
+    private int isResurrectedHash;
+    private int isLeapingHash;
+    private int isAlertHash;
+    private int isAttackingHash;
+
+    // ── Runtime State ─────────────────────────────────────────────
+    private bool isAttacking = true;
+    private bool isLeaping = false;
+    private float leapCooldownTimer = 0f;
+    private float distance = 0f;
+    private Vector3 playerDirection;
+    private Vector3 eyePosition;
     private void Start()
     {
-        Agent = GetComponent<NavMeshAgent>();
-        anim = GetComponent<Animator>();
-        Agent.speed = speed;
+
+        movementStateManager = Player.gameObject.GetComponent<MovementStateManager>();
+        playerStats = Player.gameObject.GetComponent<PlayerStats>();
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+
+        isDeadHash = Animator.StringToHash("isDead");
+        isResurrectedHash = Animator.StringToHash("isResurrected");
+        isLeapingHash = Animator.StringToHash("isLeaping");
+        isAlertHash = Animator.StringToHash("isAlert");
+        isAttackingHash = Animator.StringToHash("isAttacking");
+
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+        agent.speed = speed;
+
         if (Player == null)
         {
             Player = GameObject.FindGameObjectWithTag("Player").transform;
         }
-        movementStateManagerReference = Player.gameObject.GetComponent<MovementStateManager>();
-        playerStatsReference = Player.gameObject.GetComponent<PlayerStats>();
 
     }
 
     private void Update()
     {
 
-        if (anim.runtimeAnimatorController != null)
-        {
-            anim.SetBool("isWalking", false);
-        }
-
         Debug.DrawRay(transform.position, transform.forward * 5, Color.red);
 
-        if (isDead) return;
+        if (currentState == EnemyState.Dead || currentState == EnemyState.PermanentlyDead) return;
 
         distance = Vector3.Distance(transform.position, Player.position);
 
         if (CanSeePlayer() || CanHearPlayer())
         {
-            Agent.SetDestination(Player.position);
+            agent.SetDestination(Player.position);
+            animator.SetBool(isAlertHash, true);
 
             if (distance <= attackDistance && isAttacking)
             {
@@ -63,25 +107,37 @@ public class ZombieAI : MonoBehaviour
         }
         else
         {
-            if (anim.runtimeAnimatorController != null)
-            {
-                anim.SetBool("isWalking", false);
-            }
-            Agent.ResetPath();
 
+            if (agent.isActiveAndEnabled)
+            {
+                agent.ResetPath();
+            }
+            animator.SetBool(isAlertHash, false);
+
+        }
+
+        if (currentState != EnemyState.Resurrected) return;
+
+        leapCooldownTimer -= Time.deltaTime;
+
+
+        if (!isLeaping && leapCooldownTimer <= 0f && distance <= leapRange)
+        {
+            StartCoroutine(Leap());
         }
 
         IEnumerator AttackPlayer()
         {
             isAttacking = false;
-            Agent.isStopped = true;
-            // here goes attack animation
-            playerStatsReference.health -= 25f;
+            agent.isStopped = true;
+            animator.SetBool(isAttackingHash, true);
+            playerStats.health -= 25f;
             yield return new WaitForSeconds(attackInterval);
-            Agent.isStopped = false;
+            animator.SetBool(isAttackingHash, false);
+            agent.isStopped = false;
             isAttacking = true;
-
         }
+
     }
 
     public void TakeDamage(int damage)
@@ -98,13 +154,22 @@ public class ZombieAI : MonoBehaviour
 
     private void Die()
     {
-        isDead = true;
+
+        if (currentState == EnemyState.Resurrected)
+        {
+            PermanentDeath();
+        }
+        else
+        {
+            currentState = EnemyState.Dead;
+            animator.SetBool(isDeadHash, true);
+            Instantiate(mist, gameObject.transform.position, mist.transform.rotation);
+        }
         Debug.Log(gameObject.name + " died");
 
-        Agent.isStopped = true;
+        agent.isStopped = true;
+        Debug.Log("Die() called, currentState: " + currentState);
 
-        Instantiate(mist, gameObject.transform.position, mist.transform.rotation);
-        Destroy(gameObject);
     }
 
     private bool CanSeePlayer()
@@ -140,7 +205,7 @@ public class ZombieAI : MonoBehaviour
         playerDirection = (Player.position - transform.position).normalized;
         eyePosition = transform.position + Vector3.up * 1.5f;
 
-        if (movementStateManagerReference.noiseLevel >= distance)
+        if (movementStateManager.noiseLevel >= distance)
         {
             if (Physics.Raycast(eyePosition, playerDirection, out RaycastHit hit))
             {
@@ -160,6 +225,52 @@ public class ZombieAI : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public void Resurrect()
+    {
+        currentState = EnemyState.Resurrected;
+        aggression = 2f;
+        animator.SetBool(isDeadHash, false);
+        animator.SetBool(isResurrectedHash, true);
+    }
+
+    public void PermanentDeath()
+    {
+        currentState = EnemyState.PermanentlyDead;
+        animator.SetBool(isResurrectedHash, false);
+        animator.SetBool(isDeadHash, true);
+    }
+
+    private IEnumerator Leap()
+    {
+        isLeaping = true;
+        animator.SetBool(isLeapingHash, true);
+
+        agent.enabled = false;
+        rb.isKinematic = false;
+
+        Vector3 direction = (Player.position - transform.position).normalized;
+        rb.AddForce(direction * leapForce + Vector3.up * leapForce * 0.5f, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(1.5f); // PLACEHOLDER: tune to match animation length
+
+        rb.isKinematic = true;
+        agent.enabled = true;
+        animator.SetBool(isLeapingHash, false);
+
+        isLeaping = false;
+        leapCooldownTimer = leapCooldown;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!isLeaping) return;
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            playerStats.health -= leapDamage;
+        }
     }
 
 }

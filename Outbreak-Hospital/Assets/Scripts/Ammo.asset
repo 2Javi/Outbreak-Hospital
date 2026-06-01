@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 246d05b3473a84bc9aa38fa124be7781, type: 3}
   m_Name: Ammo
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  ItemName: 
+  ItemName: Ammo
   icon: {fileID: 0}
   isStackable: 0

@@ -1,21 +1,29 @@
 using UnityEngine;
+using System.Collections;
 
 public class MistLogic : MonoBehaviour
 {
     private GameObject playerRef;
     PlayerStats referenceToPlayerStats;
     MovementStateManager referenceToMovemementStateManager;
-    void Update()
-    {
+    ZombieAI zombieAI;
+    private bool canResurrect = false;
 
-    }
     void Start()
     {
         playerRef = GameObject.FindGameObjectWithTag("Player");
         referenceToPlayerStats = playerRef.GetComponent<PlayerStats>();
         referenceToMovemementStateManager = playerRef.GetComponent<MovementStateManager>();
-        Destroy(gameObject, 10);
+        Destroy(gameObject, 500);
+        StartCoroutine(ResurrectDelay());
     }
+
+    IEnumerator ResurrectDelay()
+    {
+        yield return new WaitForSeconds(3f); // tune to death animation length
+        canResurrect = true;
+    }
+
     void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -26,6 +34,13 @@ public class MistLogic : MonoBehaviour
             referenceToPlayerStats.health -= 10f * Time.deltaTime;
         }
 
-        // increatese it by 1 
+        if (canResurrect)
+        {
+            ZombieAI enemy = other.GetComponent<ZombieAI>();
+            if (enemy != null && enemy.currentState == EnemyState.Dead)
+            {
+                enemy.Resurrect();
+            }
+        }
     }
 }
