@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DepositBody : MonoBehaviour
 {
-    ZombieAI zombieAI;
+
 
     void Start()
     {
@@ -18,10 +18,17 @@ public class DepositBody : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (!other.CompareTag("Enemy")) return;
 
-    if (!other.CompareTag("Enemy")) return;
+    ZombieAI zombieAI = other.GetComponent<ZombieAI>();
 
-    zombieAI = other.gameObject.GetComponent<ZombieAI>();
-    Destroy(zombieAI.mistLogic.gameObject);
+            if (zombieAI == null) return;
+
+            if (zombieAI.mistLogic != null)
+            Destroy(zombieAI.mistLogic.gameObject);
+
+                    Destroy(other.gameObject);
+
+
     }
 }
