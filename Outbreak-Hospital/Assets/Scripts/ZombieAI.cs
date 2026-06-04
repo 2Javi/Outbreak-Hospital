@@ -38,6 +38,8 @@ public class ZombieAI : MonoBehaviour
     [Header("References")]
     public Transform Player;
     [SerializeField] private GameObject mist;
+    public MistLogic mistLogic;
+
 
     // ── Cached Components ─────────────────────────────────────────
     private Animator animator;
@@ -97,7 +99,12 @@ public class ZombieAI : MonoBehaviour
 
         if (CanSeePlayer() || CanHearPlayer())
         {
-            agent.SetDestination(Player.position);
+
+            if (agent.isActiveAndEnabled)
+            {
+                agent.SetDestination(Player.position);
+            }
+            
             animator.SetBool(isAlertHash, true);
 
             if (distance <= attackDistance && isAttacking)
@@ -123,10 +130,12 @@ public class ZombieAI : MonoBehaviour
 
         if (!isLeaping && leapCooldownTimer <= 0f && distance <= leapRange)
         {
+            StopAllCoroutines();
             StartCoroutine(Leap());
-        }
+        }  
+    }
 
-        IEnumerator AttackPlayer()
+    IEnumerator AttackPlayer()
         {
             isAttacking = false;
             agent.isStopped = true;
@@ -138,10 +147,14 @@ public class ZombieAI : MonoBehaviour
             isAttacking = true;
         }
 
-    }
-
     public void TakeDamage(int damage)
     {
+        if (currentState == EnemyState.PermanentlyDead)
+        {
+            Debug.Log("Enemy already dead asf");
+            return;
+        }
+
         health -= damage;
         Debug.Log(gameObject.name + " took damage. Health: " + health);
 
@@ -149,7 +162,6 @@ public class ZombieAI : MonoBehaviour
         {
             Die();
         }
-
     }
 
     private void Die()
@@ -163,11 +175,16 @@ public class ZombieAI : MonoBehaviour
         {
             currentState = EnemyState.Dead;
             animator.SetBool(isDeadHash, true);
-            Instantiate(mist, gameObject.transform.position, mist.transform.rotation);
+            animator.applyRootMotion = false; 
+            GameObject mistByZombie = Instantiate(mist, (gameObject.transform.position + new Vector3(0,1,0)), mist.transform.rotation);
+            mistLogic = mistByZombie.gameObject.GetComponent<MistLogic>();
+            mistLogic.owner = gameObject.GetComponent<ZombieAI>();
+
         }
         Debug.Log(gameObject.name + " died");
 
         agent.isStopped = true;
+        agent.enabled = false;
         Debug.Log("Die() called, currentState: " + currentState);
 
     }
@@ -229,10 +246,13 @@ public class ZombieAI : MonoBehaviour
 
     public void Resurrect()
     {
+        animator.applyRootMotion = true; 
         currentState = EnemyState.Resurrected;
         aggression = 2f;
+        health = 50;
         animator.SetBool(isDeadHash, false);
         animator.SetBool(isResurrectedHash, true);
+        leapCooldownTimer = leapCooldown;
     }
 
     public void PermanentDeath()
@@ -249,13 +269,21 @@ public class ZombieAI : MonoBehaviour
 
         agent.enabled = false;
         rb.isKinematic = false;
+        rb.freezeRotation = true;
 
+        transform.LookAt(new Vector3(Player.position.x, transform.position.y, Player.position.z));
         Vector3 direction = (Player.position - transform.position).normalized;
         rb.AddForce(direction * leapForce + Vector3.up * leapForce * 0.5f, ForceMode.Impulse);
 
-        yield return new WaitForSeconds(1.5f); // PLACEHOLDER: tune to match animation length
+        yield return new WaitForSeconds(1.5f); 
 
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
         rb.isKinematic = true;
+        rb.freezeRotation = false;
+
+        yield return null; 
+
         agent.enabled = true;
         animator.SetBool(isLeapingHash, false);
 

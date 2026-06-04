@@ -8,6 +8,7 @@ public class MistLogic : MonoBehaviour
     MovementStateManager referenceToMovemementStateManager;
     ZombieAI zombieAI;
     private bool canResurrect = false;
+    public ZombieAI owner;
 
     void Start()
     {
@@ -20,7 +21,7 @@ public class MistLogic : MonoBehaviour
 
     IEnumerator ResurrectDelay()
     {
-        yield return new WaitForSeconds(3f); // tune to death animation length
+        yield return new WaitForSeconds(3f); // 
         canResurrect = true;
     }
 
@@ -37,8 +38,12 @@ public class MistLogic : MonoBehaviour
         if (canResurrect)
         {
             ZombieAI enemy = other.GetComponent<ZombieAI>();
+
+            if (enemy == null || enemy == owner) return;
+            
             if (enemy != null && enemy.currentState == EnemyState.Dead)
             {
+                Debug.Log(enemy.currentState);
                 enemy.Resurrect();
             }
         }

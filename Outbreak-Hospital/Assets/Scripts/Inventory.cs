@@ -1,32 +1,58 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    public int maxSlots = 4;
-    [SerializeField] private List<ItemData> slots;
+    public const int HAND_SLOTS = 2;
+    public const int TOTAL_SLOTS = 6;
 
-    private void Start()
-    {
-        slots = new List<ItemData>();
-    }
+    [SerializeField] private ItemData[] slots = new ItemData[TOTAL_SLOTS];
 
-    public void AddItem(ItemData item)
+    public bool AddItem(ItemData item)
     {
-        if (slots.Count < maxSlots)
+        for (int i = 0; i < TOTAL_SLOTS; i++)
         {
-            slots.Add(item);
+            if (slots[i] == null)
+            {
+                slots[i] = item;
+                return true;
+            }
         }
+
+        Debug.Log("Inventory full.");
+        return false;
     }
 
     public bool HasItem(ItemData item)
     {
-        return slots.Contains(item);
-
+        for (int i = 0; i < TOTAL_SLOTS; i++)
+        {
+            if (slots[i] == item) return true;
+        }
+        return false;
     }
 
     public void RemoveItem(ItemData item)
     {
-        slots.Remove(item);
+        for (int i = 0; i < TOTAL_SLOTS; i++)
+        {
+            if (slots[i] == item)
+            {
+                slots[i] = null;
+                return;
+            }
+        }
+    }
+
+    // Hand slot checks — used by HandStateManager
+    public bool IsHandSlotEmpty(int index)
+    {
+        if (index > 1) return false; // only 0 and 1 are hand slots
+        return slots[index] == null;
+    }
+
+    // Direct slot access — used by HandStateManager
+    public ItemData GetSlot(int index)
+    {
+        return slots[index];
     }
 }
