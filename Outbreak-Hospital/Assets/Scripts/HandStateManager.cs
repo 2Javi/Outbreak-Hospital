@@ -16,10 +16,16 @@ public class HandStateManager : MonoBehaviour
     }
 
     void CheckHandState()
-    {
-        bool leftHandEmpty = inventory.GetSlot(0) == null;
-        bool rightHandEmpty = inventory.GetSlot(1) == null;
+{
+    bool leftHandEmpty = IsSlotEmpty(0);
+    bool rightHandEmpty = IsSlotEmpty(1);
 
-        bothHandsEmpty = leftHandEmpty && rightHandEmpty;
-    }
+    bothHandsEmpty = leftHandEmpty && rightHandEmpty;
+}
+
+private bool IsSlotEmpty(int index)
+{
+    return inventory.IsHandSlotEmpty(index);
+}
+
 }

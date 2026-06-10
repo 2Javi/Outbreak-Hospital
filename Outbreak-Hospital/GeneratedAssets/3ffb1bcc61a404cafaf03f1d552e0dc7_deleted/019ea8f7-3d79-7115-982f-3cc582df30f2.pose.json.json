@@ -1,0 +1,12 @@
+{
+    "asset": "3ffb1bcc61a404cafaf03f1d552e0dc7",
+    "fileName": "019ea8f7-3d79-7115-982f-3cc582df30f2.pose.json",
+    "prompt": "Using a flashlight ",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1167592685,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

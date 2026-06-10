@@ -32,7 +32,7 @@ public class BodyDragSystem : MonoBehaviour
 
     void HandleInteractInput()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.F))
         {
             if (isDragging)
             {
@@ -111,20 +111,17 @@ public class BodyDragSystem : MonoBehaviour
     }
 
     void StopDragging()
+{
+    if (currentBody != null)
     {
-        if (currentBody != null)
-        {
-            currentBody.freezeRotation = false;
-            currentBody.linearVelocity = Vector3.zero;
-        }
-
-        currentBody.isKinematic = true;
-        currentBody = null;
-        isDragging = false;
-
-        // TRIGGER ANIMATION HERE
-        Debug.Log("Stopped dragging.");
+        currentBody.freezeRotation = false;
+        currentBody.linearVelocity = Vector3.zero;
+        currentBody.isKinematic = true; // ← move this INSIDE the null check
     }
+
+    currentBody = null;
+    isDragging = false;
+}
 
     public bool IsDragging() => isDragging;
     public Rigidbody GetCurrentBody() => currentBody;

@@ -141,6 +141,7 @@ public class ZombieAI : MonoBehaviour
             agent.isStopped = true;
             animator.SetBool(isAttackingHash, true);
             playerStats.health -= 25f;
+            Debug.Log(playerStats.health);
             yield return new WaitForSeconds(attackInterval);
             animator.SetBool(isAttackingHash, false);
             agent.isStopped = false;

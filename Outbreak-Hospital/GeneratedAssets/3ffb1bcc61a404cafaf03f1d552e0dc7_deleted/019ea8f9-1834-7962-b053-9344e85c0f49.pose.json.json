@@ -1,0 +1,12 @@
+{
+    "asset": "3ffb1bcc61a404cafaf03f1d552e0dc7",
+    "fileName": "019ea8f9-1834-7962-b053-9344e85c0f49.pose.json",
+    "prompt": "using a flashlight with left arm ",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1239931846,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

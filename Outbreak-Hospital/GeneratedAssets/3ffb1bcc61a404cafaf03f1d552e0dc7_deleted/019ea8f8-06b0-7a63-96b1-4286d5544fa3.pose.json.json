@@ -1,0 +1,12 @@
+{
+    "asset": "3ffb1bcc61a404cafaf03f1d552e0dc7",
+    "fileName": "019ea8f8-06b0-7a63-96b1-4286d5544fa3.pose.json",
+    "prompt": "Pointing a flashlight forward ",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 141142798,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

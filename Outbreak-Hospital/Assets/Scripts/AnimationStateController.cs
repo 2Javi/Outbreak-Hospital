@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.InputSystem;
 
 public class AnimationStateController : MonoBehaviour
 {
@@ -15,16 +14,14 @@ public class AnimationStateController : MonoBehaviour
     int aimingLayerIndex;
     public Rig playerRig;
     int isCruchHash;
+    private PlayerInputActions inputActions;
 
     public bool isCrouch;
-
     public bool isRunning;
-
     public bool isWalking;
 
     void Start()
     {
-
         animator = GetComponent<Animator>();
         aimingLayerIndex = animator.GetLayerIndex("Aiming");
 
@@ -35,6 +32,11 @@ public class AnimationStateController : MonoBehaviour
         isWalkingBackHash = Animator.StringToHash("isWalkingBack");
         isAimingHash = Animator.StringToHash("isAiming");
         isCruchHash = Animator.StringToHash("isCrouch");
+
+        inputActions = new PlayerInputActions();
+        inputActions.Enable();
+
+        inputActions.Player.Crouch.performed += _ => ToggleCrouch();
     }
 
     void Update()
@@ -45,49 +47,36 @@ public class AnimationStateController : MonoBehaviour
         bool isStrafingLeft = animator.GetBool(isStrafingLeftHash);
         bool isStrafingRight = animator.GetBool(isStrafingRightHash);
         bool isAiming = animator.GetBool(isAimingHash);
-        isCrouch = animator.GetBool(isCruchHash);
 
-        bool forwardPressed = Input.GetKey("w");
-        bool backPress = Input.GetKey("s");
-        bool leftPressed = Input.GetKey("a");
-        bool rightPressed = Input.GetKey("d");
-        bool runPressed = Input.GetKey("left shift");
+        bool forwardPressed = inputActions.Player.WalkForward.IsPressed();
+        bool backPressed = inputActions.Player.MoveBack.IsPressed();
+        bool leftPressed = inputActions.Player.StrafeLeft.IsPressed();
+        bool rightPressed = inputActions.Player.StrafeRight.IsPressed();
+        bool runPressed = inputActions.Player.Run.IsPressed();
         bool aimPressed = Input.GetMouseButton(1);
-        bool crouchPressed = Input.GetKeyDown("c");
-
-
-
 
         if (!isWalking && forwardPressed)
-        {
             animator.SetBool(isWalkingHash, true);
-
-        }
-
-
         if (isWalking && !forwardPressed)
             animator.SetBool(isWalkingHash, false);
 
-        if (!isWalkingBack && backPress)
+        if (!isWalkingBack && backPressed)
             animator.SetBool(isWalkingBackHash, true);
-        if (isWalkingBack && !backPress)
+        if (isWalkingBack && !backPressed)
             animator.SetBool(isWalkingBackHash, false);
 
         if (!isRunning && (forwardPressed && runPressed))
             animator.SetBool(isRunningHash, true);
-
         if (isRunning && (!forwardPressed || !runPressed))
             animator.SetBool(isRunningHash, false);
 
         if (!isStrafingLeft && leftPressed)
             animator.SetBool(isStrafingLeftHash, true);
-
         if (isStrafingLeft && !leftPressed)
             animator.SetBool(isStrafingLeftHash, false);
 
         if (!isStrafingRight && rightPressed)
             animator.SetBool(isStrafingRightHash, true);
-
         if (isStrafingRight && !rightPressed)
             animator.SetBool(isStrafingRightHash, false);
 
@@ -97,26 +86,22 @@ public class AnimationStateController : MonoBehaviour
             playerRig.weight = 1f;
             animator.SetBool(isAimingHash, true);
         }
-
         if (isAiming && !aimPressed)
         {
             animator.SetLayerWeight(aimingLayerIndex, 0);
             playerRig.weight = 0f;
             animator.SetBool(isAimingHash, false);
         }
+    }
 
-        if (Input.GetKeyDown("c"))
-        {
-            // Debug.Log("before: " + isCrouch);
-            isCrouch = !isCrouch;
-            // Debug.Log("after: " + isCrouch);
-            animator.SetBool(isCruchHash, isCrouch);
+    void OnDestroy()
+    {
+        inputActions.Disable();
+    }
 
-
-        }
-
-
-
-
+    void ToggleCrouch()
+    {
+        isCrouch = !isCrouch;
+        animator.SetBool(isCruchHash, isCrouch);
     }
 }

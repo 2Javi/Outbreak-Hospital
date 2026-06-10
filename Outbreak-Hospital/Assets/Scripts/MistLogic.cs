@@ -27,12 +27,25 @@ public class MistLogic : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
+
+        Inventory inv = other.GetComponent<Inventory>();
+
         if (other.CompareTag("Player"))
         {
             Debug.Log("player in mist");
+
+            if (inv != null && inv.maskSlot != null)
+            {
+                inv.maskSlot.DegradeMask(25f * Time.deltaTime, inv);
+            }
+
+            if (inv.maskSlot == null)
+            {
             referenceToPlayerStats.hallucination += 1 * Time.deltaTime;
             referenceToMovemementStateManager.currentSpeed -= 0.1f * Time.deltaTime;
             referenceToPlayerStats.health -= 10f * Time.deltaTime;
+            }
+        
         }
 
         if (canResurrect)
@@ -48,4 +61,6 @@ public class MistLogic : MonoBehaviour
             }
         }
     }
+
+    
 }

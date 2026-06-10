@@ -1,0 +1,12 @@
+{
+    "asset": "3ffb1bcc61a404cafaf03f1d552e0dc7",
+    "fileName": "019ea8f8-cfb0-7a09-bae8-95e7ba5961df.pose.json",
+    "prompt": "Pointing a flashlight forward with left arm ",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1213004492,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}
